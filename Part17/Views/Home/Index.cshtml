@@ -1,12 +1,28 @@
-﻿@model IEnumerable<Part17.Models.User>
+﻿@model Part17.Models.IndexViewModel
 @{
     ViewBag.Title = "Все пользователи";
 }
 <a asp-action="Create">Добавить пользователя</a><br>
 <a asp-action="AddCompany">Добавить компанию</a>
+<h2>Фильтр пользователя</h2>
+<form asp-action="Index" method="post">
+    <div>
+        <label>Имя</label>
+        <input type="text" name="name" value="@Model.filterViewModel.SelectedName"/>
+        <label>Компания:</label>
+        <select name="compId" asp-items="Model.filterViewModel.Companies"></select>
+        <input type="submit" value="Применить" />
+    </div>
+</form>
 <table class="table">
-    <tr><td><a asp-action="Index" asp-route-sortType="@ViewData["sortType"]">Список пользователей</a></td></tr>
-    @foreach (var item in Model)
+    <tr><td><a asp-action="Index" 
+               asp-route-compId="@Model.filterViewModel.SelectedCompany"
+               asp-route-name="@Model.filterViewModel.SelectedName" 
+               asp-route-sortType="@Model.sortViewModel.sortOrder">Список пользователей
+            </a>
+        </td>
+    </tr>
+    @foreach (var item in Model.user)
     {
         <tr>
             <td>@item.Name</td>

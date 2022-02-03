@@ -23,17 +23,39 @@ namespace Part17.Controllers
         {
             db = myAppContext;
             companies = db.Companies.ToList();
+            users = db.users.ToList();
         }
-        // Сортировка Списка пользователей. Критерий сортировки передается в метод Index в виде параметра sortType
-        public IActionResult Index(bool sortType)
+        // Фильтрация и Сортировка Списка пользователей. Критерий фильтрации и сортировки передается в метод
+        public IActionResult Index(string name, int compId, bool sortType)
         {
-            ViewData["sortType"] = !sortType;
-            if ((bool)ViewData["sortType"])
-                users = db.users.OrderBy(u => u.Name).ToList();
+            // фильтрация          
+            if (name != null)
+            {
+                users = users.Where(u => u.Name.Contains(name)).ToList(); // если поле не пустое, то ищем в users совпадения
+            }
+            if (compId != 0)
+            {
+                users = users.Where(u => u.CompanyId == compId).ToList(); // если выбрана компания, то ищем только их сотрудников
+            }
+
+            // сортировка
+            if (sortType)
+                users = users.OrderBy(u => u.Name).ToList();
             else
-                users = db.users.OrderByDescending(u => u.Name).ToList();
+                users = users.OrderByDescending(u => u.Name).ToList();
+
+            // создаем экзмепляры классов Sort и FilterViewModel
+            FilterViewModel filterViewModel = new FilterViewModel(companies, compId, name);
+            SortViewModel sortViewModel = new SortViewModel(sortType);
             
-            return View(users);
+            // создаем экзмепляр класса IndexViewModel и передаем в View
+            IndexViewModel indexViewModel = new IndexViewModel()
+            {
+                user = users.ToList(),
+                filterViewModel = filterViewModel,
+                sortViewModel = sortViewModel
+            };
+            return View(indexViewModel);
         }
         // форма добавления пользователя. В view передаем SelectList для выбора компании
         public IActionResult Create()
@@ -87,45 +109,25 @@ namespace Part17.Controllers
             db.SaveChanges();
             return RedirectToAction("Index");
         }
-        // фильтрация по имени и компании
         public IActionResult Privacy(string name, int compId)
-        {
-            List<User> users = db.users.ToList();
-            if (name != null)
-            {
-                users = users.Where(u => u.Name.Contains(name)).ToList(); // если поле не пустое, то ищем в users совпадения
-            }
-            if (compId != 0)
-            {
-                users = users.Where(u => u.CompanyId == compId).ToList(); // если выбрана компания, то ищем только их сотрудников
-            }
-
-            // устанавливаем начальный элемент, который позволит выбрать всех
-            companies.Insert(0, new Company { Name = "Все", Id = 0 });
-
-            // создаем экзмепляр класса UserListViewModel и передаем в View
-            UserListViewModel viewModel = new UserListViewModel
-            {
-                Users = users.ToList(),
-                Companies = new SelectList(companies, "Id", "Name"),
-            };
-
-            return View(viewModel);
-        }
-        // Добавление компании
-        public IActionResult AddCompany()
         {
             return View();
         }
-        [HttpPost]
-        public IActionResult AddCompany(Company company)
-        {
-            if (company.Name != null)
+
+        // Добавление компании
+        public IActionResult AddCompany()
             {
-                db.Companies.Add(company);
-                db.SaveChanges();
+                return View();
             }
-            return RedirectToAction("Index");
+            [HttpPost]
+            public IActionResult AddCompany(Company company)
+            {
+                if (company.Name != null)
+                {
+                    db.Companies.Add(company);
+                    db.SaveChanges();
+                }
+                return RedirectToAction("Index");
+            }
         }
-    }
 }
