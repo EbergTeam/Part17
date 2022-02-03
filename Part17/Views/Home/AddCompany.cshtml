@@ -1,0 +1,13 @@
+﻿@model Part17.Models.Company
+@{
+    ViewBag.Title = "Добавление компании";
+}
+<form asp-action="AddCompany" asp-controller="home">
+    <div>
+        <label asp-for="Name">Название</label>
+        <input type="text" asp-for="Name"/>
+    </div>
+    <div>
+        <input type="submit" value="Отправить"/>
+    </div>
+</form>

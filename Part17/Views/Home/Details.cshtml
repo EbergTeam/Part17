@@ -1,0 +1,17 @@
+﻿@model Part17.Models.User
+@{
+    ViewBag.Title = Model.Name;
+}
+<h2>Данные о пользователе @Model.Name</h2>
+<div>
+    <dl class="dl-horizontal">
+        <dt>Идентификатор</dt>
+        <dd>@Model.Id</dd>
+
+        <dt>Возраст</dt>
+        <dd>@Model.Age</dd>
+
+        <dt>Компания</dt>
+        <dd>@Model.Company.Name</dd>
+    </dl>
+</div>
